@@ -1,0 +1,17 @@
+$1
+$1           `:IllllllllllI:`.
+$1        .IllllllllllllllllllI.
+$1        ':IllllllllllllllllI:`
+$1        "l;;:::;;IIII;;:::;;l"
+$1        "llllllllIIIIllllllll"
+$1        "llllllllllllllllllll"
+$1        "llllllllllllllllllll"
+$1      .`"llllllllllllllllllll"^'
+$1   .";ll,llllllllllllllllllll,llI,'
+$1  `Illll,llllllllllllllllllll,llllI`
+$1 .,lllll,;llllllllllllllllll;,lllll:.
+$1  ':llllllI:::;;;;;;;;;;:::Illllll:'
+$1    '";llllllllllllllllllllllllI,'
+$1       .'`":IllllllllllllI:"^'.
+$1                ......
+$1
