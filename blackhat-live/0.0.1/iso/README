@@ -1,20 +1,20 @@
 # WICHTIG:
-# DIE VERWENDUNG VON RUFUS/VENTOY ZUM
-# SCHREIBEN DES ABBILDS IST UNTERSAGT
+# Empfohlene Methoden zum Schreiben / Starten des Abbilds:
 
-# Verwenden Sie dies:
+# 1. Direkt auf USB-Stick (dd):
     dd if=blackhat-live-0.0.1.iso of=/dev/<xxx> bs=4M status=progress oflag=sync
 
 # Beispiel für USB-Stick:
     dd if=blackhat-live-0.0.1.iso of=/dev/sdb bs=4M status=progress oflag=sync
 # Achtung: /dev/sdb (das ganze Gerät), NICHT /dev/sdb1 (die Partition).
 
-# Beispiel für CD-RW / DVD-RW:
+# 2. Ventoy (BIOS & UEFI, Normal- und Grub2-Modus):
+# Einfach blackhat-live-0.0.1.iso auf die Ventoy-Partition kopieren und booten.
+
+# 3. Beispiel für CD-RW / DVD-RW:
     wodim -v dev=/dev/sr0 blank=fast
     wodim -v dev=/dev/sr0 speed=8 blackhat-live-0.0.1.iso
 # Oder mit xorriso (bereits installiert):
     xorriso -as cdrecord -v dev=/dev/sr0 -speed 8 -eject blackhat-live-0.0.1.iso
 
-# Ventoy wird NICHT unterstützt.
-# Wer Ventoy braucht, muss initramfs und Image selbst neu bauen.
-# Quellen und Build-Skripte: http://77.105.133.52:8844/
+# Quellen und Build-Skripte: http://77.105.133.52/

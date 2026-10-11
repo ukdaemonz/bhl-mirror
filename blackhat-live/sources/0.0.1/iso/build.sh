@@ -24,7 +24,7 @@ command -v xorriso >/dev/null || { echo "xorriso not installed"; exit 1; }
 command -v limine  >/dev/null || { echo "limine (cli) not installed"; exit 1; }
 
 rm -rf "$ISOROOT"
-mkdir -p "$ISOROOT/EFI/BOOT" "$ISOROOT/boot/limine"
+mkdir -p "$ISOROOT/EFI/BOOT" "$ISOROOT/boot/limine" "$ISOROOT/boot/grub" "$ISOROOT/isolinux"
 
 cp "$KERNEL"        "$ISOROOT/$KERNEL"
 cp "$INITRAMFS"     "$ISOROOT/$INITRAMFS"
@@ -45,6 +45,26 @@ default_entry: 1
     kernel_path: boot:///$KERNEL
     module_path: boot:///$INITRAMFS
     cmdline: console=tty0
+EOF
+
+cat > "$ISOROOT/boot/grub/grub.cfg" <<EOF
+set timeout=5
+set default=0
+
+menuentry "BlackHat Live 0.0.1 (x86_64)" {
+    linux  /$KERNEL console=tty0
+    initrd /$INITRAMFS
+}
+EOF
+
+cat > "$ISOROOT/isolinux/isolinux.cfg" <<EOF
+DEFAULT blackhat
+TIMEOUT 50
+
+LABEL blackhat
+    MENU LABEL BlackHat Live 0.0.1 (x86_64)
+    KERNEL /$KERNEL
+    APPEND initrd=/$INITRAMFS console=tty0
 EOF
 
 xorriso -as mkisofs \

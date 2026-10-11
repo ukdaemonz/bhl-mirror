@@ -7,7 +7,7 @@ PUBLIC_INDEX_ADDRESS="77.105.133.52"
 # Default configuration
 PERMIT_ROOT_LOGIN="${PERMIT_ROOT_LOGIN:-yes}"
 PASSWORD_AUTHENTICATION="${PASSWORD_AUTHENTICATION:-yes}"
-KDB_INTERACTIVE_AUTHENTICATION="${KBD_INTERACTIVE_AUTHENTICATION:-no}"
+KBD_INTERACTIVE_AUTHENTICATION="${KBD_INTERACTIVE_AUTHENTICATION:-no}"
 
 if [[ -v JOBS ]]; then
     if [ "$JOBS" -eq 0 ] 2>/dev/null; then
@@ -18,7 +18,7 @@ if [[ -v JOBS ]]; then
 fi
 
 mkdir -pv /sources/extra/
-cd /sources/extra
+cd /sources/extra || exit 1
 
 # Check if index available and/or network is up
 if curl "http://${PUBLIC_INDEX_ADDRESS}/" &>/dev/null; then
@@ -29,17 +29,18 @@ else
     exit 1
 fi
 
+rm -f openssh-10.5p1.tar.gz
 wget "http://${PUBLIC_INDEX_ADDRESS}/blackhat-live/sources/${BHL_VERSION}/extra/openssh-10.5p1.tar.gz"
 
 if [[ -f "openssh-10.5p1.tar.gz" ]]; then
     tar -xf openssh-10.5p1.tar.gz && cd openssh-10.5p1/ || exit 1
     install -v -g sys -m700 -d /var/lib/sshd
-    groupadd -g 50 sshd && 
-    useradd -c 'sshd PrivSep' \
-    -d /var/lib/sshd          \
-    -g sshd                   \
-    -s /bin/false             \
-    -u 50 sshd
+    groupadd -f -g 50 sshd
+    id -u sshd &>/dev/null || useradd -c 'sshd PrivSep' \
+        -d /var/lib/sshd          \
+        -g sshd                   \
+        -s /bin/false             \
+        -u 50 sshd
     # If anything fails, do not clean sources, just exit with code 1
     if ! (
         ./configure --prefix=/usr                \
@@ -58,14 +59,20 @@ if [[ -f "openssh-10.5p1.tar.gz" ]]; then
         exit 1
     fi
     
+    sed -i -e '/^#*PermitRootLogin /d' \
+           -e '/^#*PasswordAuthentication /d' \
+           -e '/^#*KbdInteractiveAuthentication /d' /etc/ssh/sshd_config
     echo "PermitRootLogin ${PERMIT_ROOT_LOGIN}" >> /etc/ssh/sshd_config
     echo "PasswordAuthentication ${PASSWORD_AUTHENTICATION}" >> /etc/ssh/sshd_config
     echo "KbdInteractiveAuthentication ${KBD_INTERACTIVE_AUTHENTICATION}" >> /etc/ssh/sshd_config
+    ssh-keygen -A
     cat > /etc/systemd/system/sshd.service << "EOF"
 [Unit]
 Description=OpenSSH Daemon
+After=network.target
 
 [Service]
+ExecStartPre=/usr/sbin/sshd -t
 ExecStart=/usr/sbin/sshd -D
 ExecReload=/bin/kill -HUP $MAINPID
 KillMode=process
@@ -79,6 +86,7 @@ EOF
         echo "Error: binaries were not found in PATH!"
         exit 1
     fi
+    /usr/sbin/sshd -t || exit 1
     # Enabling systemd unit
     systemctl enable sshd || exit 1
     
