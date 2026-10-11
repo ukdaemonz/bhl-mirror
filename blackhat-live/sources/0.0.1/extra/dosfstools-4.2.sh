@@ -3,7 +3,7 @@
 JOBS="${JOBS:-$(nproc)}"
 INITIAL_DIR="${INITIAL_DIR:-$(pwd)}"
 BHL_VERSION="0.0.1"
-PUBLIC_INDEX_ADDRESS="77.105.133.52:8844"
+PUBLIC_INDEX_ADDRESS="77.105.133.52"
 
 if [[ -v JOBS ]]; then
     if [ "$JOBS" -eq 0 ] 2>/dev/null; then
