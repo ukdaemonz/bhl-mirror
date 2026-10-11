@@ -4,7 +4,7 @@ mount -t proc proc /proc
 mount -t sysfs sys /sys
 mount -t devtmpfs dev /dev
 
-for mod in squashfs overlay nvme ext4 exfat virtio_blk ahci usb-storage sr_mod iso9660 vfat xfs btrfs f2fs dm_mod loop; do
+for mod in squashfs overlay nvme ext4 exfat virtio_blk ahci usb-storage sr_mod iso9660 vfat xfs btrfs f2fs dm_mod loop spl zfs; do
     modprobe "$mod" 2>/dev/null
 done
 
@@ -19,6 +19,9 @@ echo "done."
 # Parse live= parameter from the kernel command line
 LIVE_PARAM=""
 ISO_HINT=""
+ZFS_ROOT=""
+ZFS_FORCE=0
+ZFS_ARC_MAX="1073741824"
 for arg in $(cat /proc/cmdline); do
     case "$arg" in
         live=*)
@@ -26,6 +29,23 @@ for arg in $(cat /proc/cmdline); do
             ;;
         iso-scan/filename=*|findiso=*|fromiso=*)
             ISO_HINT="${arg#*=}"
+            ;;
+        root=ZFS=*|root=zfs:*)
+            ZFS_ROOT="${arg#root=}"
+            ZFS_ROOT="${ZFS_ROOT#ZFS=}"
+            ZFS_ROOT="${ZFS_ROOT#zfs:}"
+            ;;
+        root=zfs|root=ZFS)
+            ZFS_ROOT="AUTO"
+            ;;
+        zfs=*|bootfs=*)
+            ZFS_ROOT="${arg#*=}"
+            ;;
+        zfs_force=1|zfs.force=1|zfsforce)
+            ZFS_FORCE=1
+            ;;
+        zfs_arc_max=*|zfs.zfs_arc_max=*)
+            ZFS_ARC_MAX="${arg#*=}"
             ;;
     esac
 done
@@ -45,6 +65,99 @@ if [ -n "$LIVE_PARAM" ]; then
     echo "Live parameter detected:"
     echo "  Device: $LIVE_DEV"
     echo "  File:   $LIVE_FILE"
+fi
+
+mount_zfs_root() {
+    [ -n "$ZFS_ROOT" ] || return 1
+    echo "ZFS root requested: $ZFS_ROOT"
+
+    modprobe spl 2>/dev/null
+    modprobe zfs zfs_arc_max="$ZFS_ARC_MAX" 2>/dev/null
+    if [ -w /sys/module/zfs/parameters/zfs_arc_max ]; then
+        echo "$ZFS_ARC_MAX" > /sys/module/zfs/parameters/zfs_arc_max 2>/dev/null
+    fi
+
+    for _ in 1 2 3 4 5; do
+        [ -e /dev/zfs ] && break
+        read -t 1 -r _ 2>/dev/null
+    done
+
+    if ! command -v zpool >/dev/null 2>&1 || ! command -v zfs >/dev/null 2>&1; then
+        echo "ERROR: zpool/zfs utilities not present in initramfs!"
+        return 1
+    fi
+
+    mkdir -pv /mnt/root
+
+    local dataset="" pool=""
+    if [ "$ZFS_ROOT" = "AUTO" ]; then
+        zpool import -N -a -f 2>/dev/null
+        while read -r p bf; do
+            if [ -n "$bf" ] && [ "$bf" != "-" ]; then
+                dataset="$bf"
+                pool="$p"
+                break
+            fi
+        done < <(zpool list -H -o name,bootfs 2>/dev/null)
+        if [ -z "$dataset" ]; then
+            echo "ERROR: Could not auto-detect ZFS bootfs dataset!"
+            return 1
+        fi
+    else
+        dataset="$ZFS_ROOT"
+        pool="${dataset%%/*}"
+    fi
+
+    if ! zpool list -H "$pool" >/dev/null 2>&1; then
+        echo "Importing ZFS pool: $pool"
+        if [ "$ZFS_FORCE" = "1" ]; then
+            zpool import -N -f "$pool" || return 1
+        else
+            zpool import -N "$pool" 2>/dev/null || zpool import -N -f "$pool" || return 1
+        fi
+    fi
+
+    local encroot="" keystatus=""
+    encroot="$(zfs get -H -o value encryptionroot "$dataset" 2>/dev/null || echo -)"
+    if [ -n "$encroot" ] && [ "$encroot" != "-" ]; then
+        keystatus="$(zfs get -H -o value keystatus "$encroot" 2>/dev/null || echo -)"
+        if [ "$keystatus" = "unavailable" ]; then
+            for _ in 1 2 3; do
+                echo "Enter passphrase for ZFS dataset $encroot:"
+                zfs load-key "$encroot" && break
+            done
+        fi
+    fi
+
+    local mp=""
+    mp="$(zfs get -H -o value mountpoint "$dataset" 2>/dev/null || echo /)"
+    echo "Mounting ZFS root dataset $dataset (mountpoint=$mp)..."
+    if [ "$mp" = "legacy" ]; then
+        mount -t zfs "$dataset" /mnt/root || return 1
+    else
+        mount -t zfs -o zfsutil "$dataset" /mnt/root 2>/dev/null || mount -t zfs "$dataset" /mnt/root || return 1
+    fi
+
+    while IFS=$'\t' read -r child cmp ccan; do
+        [ "$child" = "$dataset" ] && continue
+        [ "$ccan" = "on" ] || continue
+        case "$cmp" in
+            /?*)
+                mkdir -p "/mnt/root${cmp}"
+                mount -t zfs -o zfsutil "$child" "/mnt/root${cmp}" 2>/dev/null || mount -t zfs "$child" "/mnt/root${cmp}" 2>/dev/null || true
+                ;;
+        esac
+    done < <(zfs list -t filesystem -H -o name,mountpoint,canmount -r "$pool" 2>/dev/null)
+
+    echo "Switching root to ZFS ($dataset)..."
+    exec switch_root /mnt/root /lib/systemd/systemd
+}
+
+if [ -n "$ZFS_ROOT" ]; then
+    if ! mount_zfs_root; then
+        echo "ERROR: Failed to mount ZFS root ($ZFS_ROOT)!"
+        exec /bin/bash
+    fi
 fi
 
 setup_ventoy_dm() {
