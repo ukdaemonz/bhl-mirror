@@ -41,7 +41,9 @@ else
 fi
 
 mkdir -pv /sources/extra/
-cd /sources/extra
+cd /sources/extra || exit 1
+
+rm -f efivar-39.tar.gz popt-1.19.tar.gz efibootmgr-18.tar.gz efivar-39-upstream_fixes-1.patch
 
 # Get dependencies
 wget "http://${PUBLIC_INDEX_ADDRESS}/blackhat-live/sources/${BHL_VERSION}/extra/efibootmgr/efivar-39.tar.gz"
@@ -53,6 +55,7 @@ wget "http://${PUBLIC_INDEX_ADDRESS}/blackhat-live/sources/${BHL_VERSION}/extra/
 
 # efivar-39
 if [[ -f "efivar-39.tar.gz" ]]; then
+    rm -rf efivar-39
     tar -xf efivar-39.tar.gz && cd efivar-39/ || exit 1
     mv ../efivar-39-upstream_fixes-1.patch ./ || exit 1
     
@@ -61,11 +64,12 @@ if [[ -f "efivar-39.tar.gz" ]]; then
         patch -Np1 -i efivar-39-upstream_fixes-1.patch || exit 1
     fi
     # Build and install efivar-39
-    if ! (make ENABLE_DOCS=0 -j"$JOBS" && make install ENABLE_DOCS=0 LIBDIR=/usr/lib); then
+    if ! (make ENABLE_DOCS=0 ERRORS= -j"$JOBS" && make install ENABLE_DOCS=0 LIBDIR=/usr/lib); then
         echo "Error: installation failed!"
         exit 1
     fi
-    cd /sources/extra/
+    ldconfig 2>/dev/null || true
+    cd /sources/extra/ || exit 1
 else
     echo "No archive found."
     echo "Try to re-run this script"
@@ -74,13 +78,15 @@ fi
 
 # popt-1.19
 if [[ -f "popt-1.19.tar.gz" ]]; then
+    rm -rf popt-1.19
     tar -xf popt-1.19.tar.gz && cd popt-1.19/ || exit 1
     
     if ! (./configure --prefix=/usr --disable-static && make -j"$JOBS" && make install); then
         echo "Error: configuration, build or installation failed!"
         exit 1
     fi
-    cd /sources/extra
+    ldconfig 2>/dev/null || true
+    cd /sources/extra || exit 1
 else
     echo "No archive found."
     echo "Try to re-run this script"
@@ -89,9 +95,10 @@ fi
 
 # efibootmgr-18
 if [[ -f "efibootmgr-18.tar.gz" ]]; then
+    rm -rf efibootmgr-18
     tar -xf efibootmgr-18.tar.gz && cd efibootmgr-18/ || exit 1
     
-    if ! (make -j"$JOBS" && make install); then
+    if ! (make EFIDIR=BHL ERRORS= -j"$JOBS" && make EFIDIR=BHL install); then # DO NOT INSTALL LOADER HERE
         echo "Error: build or installation failed!"
         exit 1
     fi
