@@ -1,0 +1,95 @@
+kernel/fs/nls/nls_ucs2_utils.ko:
+kernel/fs/exfat/exfat.ko:
+kernel/drivers/virtio/virtio_dma_buf.ko:
+kernel/drivers/tty/serial/8250/8250_dw.ko:
+kernel/drivers/tty/serial/8250/8250_pci1xxxx.ko:
+kernel/drivers/char/tpm/tpm.ko:
+kernel/drivers/gpu/drm/tiny/appletbdrm.ko:
+kernel/drivers/gpu/drm/tiny/bochs.ko:
+kernel/drivers/gpu/drm/tiny/cirrus-qemu.ko:
+kernel/drivers/gpu/drm/sitronix/st7571.ko:
+kernel/drivers/gpu/drm/solomon/ssd130x.ko:
+kernel/drivers/gpu/drm/drm_exec.ko:
+kernel/drivers/gpu/drm/drm_gpuvm.ko: kernel/drivers/gpu/drm/drm_exec.ko
+kernel/drivers/gpu/drm/drm_gpusvm_helper.ko:
+kernel/drivers/gpu/drm/drm_suballoc_helper.ko:
+kernel/drivers/gpu/drm/drm_vram_helper.ko:
+kernel/drivers/gpu/drm/scheduler/gpu-sched.ko:
+kernel/drivers/gpu/drm/radeon/radeon.ko: kernel/drivers/gpu/drm/drm_exec.ko kernel/drivers/gpu/drm/drm_suballoc_helper.ko
+kernel/drivers/gpu/drm/xe/xe.ko: kernel/drivers/gpu/drm/scheduler/gpu-sched.ko kernel/drivers/gpu/drm/drm_gpuvm.ko kernel/drivers/gpu/drm/drm_gpusvm_helper.ko kernel/drivers/gpu/drm/drm_exec.ko kernel/drivers/gpu/drm/drm_suballoc_helper.ko
+kernel/drivers/gpu/drm/mgag200/mgag200.ko:
+kernel/drivers/gpu/drm/vgem/vgem.ko:
+kernel/drivers/gpu/drm/nouveau/ch7006.ko:
+kernel/drivers/gpu/drm/nouveau/sil164.ko:
+kernel/drivers/gpu/drm/nouveau/nouveau.ko: kernel/drivers/gpu/drm/scheduler/gpu-sched.ko kernel/drivers/gpu/drm/drm_gpuvm.ko kernel/drivers/gpu/drm/drm_exec.ko
+kernel/drivers/gpu/drm/qxl/qxl.ko: kernel/drivers/gpu/drm/drm_exec.ko
+kernel/drivers/gpu/drm/virtio/virtio-gpu.ko: kernel/drivers/virtio/virtio_dma_buf.ko
+kernel/drivers/gpu/drm/vboxvideo/vboxvideo.ko: kernel/drivers/gpu/drm/drm_vram_helper.ko
+kernel/drivers/misc/eeprom/max6875.ko:
+kernel/drivers/misc/eeprom/idt_89hpesx.ko:
+kernel/drivers/misc/eeprom/ee1004.ko:
+kernel/drivers/misc/eeprom/m24lr.ko:
+kernel/drivers/misc/cardreader/rtsx_pci.ko: kernel/drivers/mfd/mfd-core.ko
+kernel/drivers/misc/cardreader/rtsx_usb.ko: kernel/drivers/mfd/mfd-core.ko
+kernel/drivers/misc/ibmasm/ibmasm.ko:
+kernel/drivers/misc/ad525x_dpot.ko:
+kernel/drivers/misc/ad525x_dpot-i2c.ko: kernel/drivers/misc/ad525x_dpot.ko
+kernel/drivers/misc/dummy-irq.ko:
+kernel/drivers/misc/bcm-vk/bcm_vk.ko:
+kernel/drivers/mfd/mfd-core.ko:
+kernel/drivers/scsi/raid_class.ko:
+kernel/drivers/nvme/host/nvme-fabrics.ko:
+kernel/drivers/nvme/host/nvme-fc.ko: kernel/drivers/nvme/host/nvme-fabrics.ko
+kernel/drivers/nvme/host/nvme-tcp.ko: kernel/drivers/nvme/host/nvme-fabrics.ko
+kernel/drivers/ata/sata_mv.ko:
+kernel/drivers/ata/sata_nv.ko:
+kernel/drivers/ata/sata_promise.ko:
+kernel/drivers/ata/sata_sil.ko:
+kernel/drivers/ata/sata_sis.ko: kernel/drivers/ata/pata_sis.ko
+kernel/drivers/ata/sata_svw.ko:
+kernel/drivers/ata/sata_uli.ko:
+kernel/drivers/ata/sata_via.ko:
+kernel/drivers/ata/sata_vsc.ko:
+kernel/drivers/ata/pata_ali.ko:
+kernel/drivers/ata/pata_amd.ko:
+kernel/drivers/ata/pata_artop.ko:
+kernel/drivers/ata/pata_atp867x.ko:
+kernel/drivers/ata/pata_cmd64x.ko:
+kernel/drivers/ata/pata_cypress.ko:
+kernel/drivers/ata/pata_efar.ko:
+kernel/drivers/ata/pata_hpt366.ko:
+kernel/drivers/ata/pata_hpt37x.ko:
+kernel/drivers/ata/pata_hpt3x2n.ko:
+kernel/drivers/ata/pata_hpt3x3.ko:
+kernel/drivers/ata/pata_sis.ko:
+kernel/drivers/ata/ata_generic.ko:
+kernel/drivers/ata/pata_legacy.ko:
+kernel/drivers/usb/host/oxu210hp-hcd.ko:
+kernel/drivers/usb/host/isp116x-hcd.ko:
+kernel/drivers/usb/host/sl811-hcd.ko:
+kernel/drivers/usb/host/r8a66597-hcd.ko:
+kernel/drivers/usb/class/cdc-acm.ko:
+kernel/drivers/usb/class/cdc-wdm.ko:
+kernel/drivers/usb/storage/ums-isd200.ko:
+kernel/drivers/usb/storage/ums-realtek.ko:
+kernel/drivers/i3c/i3c.ko:
+kernel/drivers/power/reset/qemu-virt-ctrl.ko:
+kernel/drivers/md/linear.ko:
+kernel/drivers/md/raid0.ko:
+kernel/drivers/md/raid1.ko:
+kernel/drivers/md/raid10.ko:
+kernel/drivers/md/raid456.ko:
+kernel/drivers/md/bcache/bcache.ko:
+kernel/drivers/md/dm-unstripe.ko:
+kernel/drivers/md/dm-bufio.ko:
+kernel/drivers/md/dm-crypt.ko:
+kernel/drivers/md/dm-multipath.ko:
+kernel/drivers/md/dm-round-robin.ko: kernel/drivers/md/dm-multipath.ko
+kernel/drivers/md/dm-snapshot.ko: kernel/drivers/md/dm-bufio.ko
+kernel/drivers/mmc/core/sdio_uart.ko:
+kernel/drivers/ufs/core/ufshcd-core.ko:
+kernel/drivers/platform/x86/mxm-wmi.ko:
+kernel/drivers/devfreq/governor_simpleondemand.ko:
+kernel/drivers/memstick/core/memstick.ko:
+extra/spl.ko:
+extra/zfs.ko: extra/spl.ko
