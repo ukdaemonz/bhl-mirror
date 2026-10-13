@@ -97,8 +97,8 @@ if [[ -f "zfs-${ZFS_VERSION}.tar.gz" ]]; then
             --with-systemdpresetdir=/usr/lib/systemd/system-preset \
             --with-systemdgeneratordir=/usr/lib/systemd/system-generators \
             --with-systemdmodulesloaddir=/usr/lib/modules-load.d \
-            --without-tirpc \
-            --disable-pyzfs
+            --disable-pyzfs \
+            # --without-tirpc <-- ukdaemonz, suck my dick!
     ); then
         echo "Error: configure failed!"
         exit 1
